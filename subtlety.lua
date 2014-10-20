@@ -26,7 +26,7 @@ local VanishCheck = function ()
   local vanishCD = (start + duration - GetTime())
   local start, duration = GetSpellCooldown("Танец теней")
   local shadowDanceCD = (start + duration - GetTime())
-  if (energy+shadowDanceCD*energyRegen) or (energy+vanishCD*energyRegen) then
+  if (energy+shadowDanceCD*energyRegen) < 80 or (energy+vanishCD*energyRegen) < 60 then
     return true
   else
     return false
