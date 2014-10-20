@@ -40,9 +40,9 @@ local poolEnergy = {
 
 local generator = {
   -- actions.generator=run_action_list,name=pool,if=buff.master_of_subtlety.down&buff.shadow_dance.down&debuff.find_weakness.down&(energy+cooldown.shadow_dance.remains*energy.regen<80|energy+cooldown.vanish.remains*energy.regen<60)
-  { poolEnergy, { "!player.buff(Мастер скрытности)", "!player.buff(Танец теней)", "!target.debuff(Поиск слабости)", (function () return VanishCheck() end) }},
+  { poolEnergy, { "!player.buff(Мастер скрытности)", "!player.buff(Танец теней)", "!target.debuff(Поиск слабости)", (VanishCheck()) }},
   -- actions.generator+=/fan_of_knives,if=active_enemies>6
-  { "Веер клинков", (function () return UnitsAroundMe(10) >= 7 end) },
+  { "Веер клинков", (UnitsAroundMe(10) >= 7) },
   -- actions.generator+=/hemorrhage,if=(remains<8&target.time_to_die>10)|position_front
   { "Кровоизлияние", "target.debuff(Кровоизлияние).duration < 8" },
   { "Кровоизлияние", "!player.behind"},
@@ -60,18 +60,18 @@ local finisher = {
   -- actions.finisher+=/death_from_above
   { "Смерть с небес", "player.spell(Смерть с небес).exists"},
   -- actions.finisher+=/rupture,cycle_targets=1,if=(!ticking|remains<duration*0.3)&active_enemies<=3&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
-  { "Рваная рана", { "!target.debuff(Рваная рана)", (function () return UnitsAroundMe(1.2) <= 3 end), "player.spell(Смерть с небес).cooldown > 0" }},
+  { "Рваная рана", { "!target.debuff(Рваная рана)", (UnitsAroundMe(1.2) <= 3), "player.spell(Смерть с небес).cooldown > 0" }},
   { "Рваная рана", { "!target.debuff(Рваная рана)", (function () return UnitsAroundMe(1.2) <= 3 end), "!player.spell(Смерть с небес).exists" }},
-  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (function () return UnitsAroundMe(1.2) <= 3 end), "player.spell(Смерть с небес).cooldown > 0" }},
-  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (function () return UnitsAroundMe(1.2) <= 3 end), "!player.spell(Смерть с небес).exists" }},
+  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (UnitsAroundMe(1.2) <= 3), "player.spell(Смерть с небес).cooldown > 0" }},
+  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (UnitsAroundMe(1.2) <= 3), "!player.spell(Смерть с небес).exists" }},
   -- actions.finisher+=/crimson_tempest,if=(active_enemies>3&dot.crimson_tempest_dot.ticks_remain<=2&combo_points=5)|active_enemies>=5&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
-  { "Кровавый вихрь", { (function () return UnitsAroundMe(10) > 3 end), "target.debuff(Кровавый вихрь).duration <= 5.9", "player.combopoints = 5"}},
-  { "Кровавый вихрь", { (function () return UnitsAroundMe(10) >= 5 end), "player.spell(Смерть с небес).cooldown > 0"}},
-  { "Кровавый вихрь", { (function () return UnitsAroundMe(10) >= 5 end), "!player.spell(Смерть с небес).exists"}},
+  { "Кровавый вихрь", { (UnitsAroundMe(10) > 3), "target.debuff(Кровавый вихрь).duration <= 5.9", "player.combopoints = 5"}},
+  { "Кровавый вихрь", { (UnitsAroundMe(10) >= 5), "player.spell(Смерть с небес).cooldown > 0"}},
+  { "Кровавый вихрь", { (UnitsAroundMe(10) >= 5), "!player.spell(Смерть с небес).exists"}},
   -- actions.finisher+=/eviscerate,if=active_enemies<4|(active_enemies>3&dot.crimson_tempest_dot.ticks_remain>=2)&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
-  { "Потрошение", { (function () return UnitsAroundMe(10) < 4 end) }},
-  { "Потрошение", { (function () return UnitsAroundMe(10) > 3 end), "target.debuff(Кровавый вихрь).duration < 5.9", "player.spell(Смерть с небес).cooldown > 0"}},
-  { "Потрошение", { (function () return UnitsAroundMe(10) > 3 end), "target.debuff(Кровавый вихрь).duration < 5.9", "!player.spell(Смерть с небес).exists"}},
+  { "Потрошение", { (UnitsAroundMe(10) < 4) }},
+  { "Потрошение", { (UnitsAroundMe(10) > 3), "target.debuff(Кровавый вихрь).duration < 5.9", "player.spell(Смерть с небес).cooldown > 0"}},
+  { "Потрошение", { (UnitsAroundMe(10) > 3), "target.debuff(Кровавый вихрь).duration < 5.9", "!player.spell(Смерть с небес).exists"}},
   -- actions.finisher+=/run_action_list,name=pool
   { poolEnergy },
 }
