@@ -1,28 +1,36 @@
-function EnemiesAroundPlayer(distance)
+local UnitsAroundMe = function (distance)
+  local total = 0
   if FireHack then
-    local total = 0
     local totalObjects = ObjectCount()
     for i = 1, totalObjects do
       local object = ObjectWithIndex(i)
       if bit.band(ObjectType(object), ObjectTypes.Unit) > 0 then
-	    if UnitReaction("player", object) <= 4 and UnitAffectingCombat(object) then
-          local ax, ay, az = ObjectPosition("player")
+      	if UnitReaction("player", object) <= 4 and UnitAffectingCombat(object) then
+      	  local ax, ay, az = ObjectPosition("player")
           local bx, by, bz = ObjectPosition(object)
-          local objDistance = abs(math.sqrt(((bx-ax)^2) + ((by-ay)^2) + ((bz-az)^2)) - (UnitCombatReach("player") + UnitCombatReach(object)))
-          if objDistance <= distance then
-	        total = total + 1
-	      end
-	    end
+          if abs(math.sqrt(((bx-ax)^2) + ((by-ay)^2) + ((bz-az)^2)) - (UnitCombatReach("player") + UnitCombatReach(object))) <= distance then
+            total = total + 1
+          end
+      	end
       end
     end
-    return total
-  else
-    return 0
   end
+  return total
 end
 
 local VanishCheck = function ()
-  return true
+  -- energy+cooldown.shadow_dance.remains*energy.regen<80|energy+cooldown.vanish.remains*energy.regen<60
+  local energy = UnitPower("player", SPELL_POWER_ENERGY)
+  local energyRegen = GetPowerRegen(player)
+  local start, duration = GetSpellCooldown("Исчезновение")
+  local vanishCD = (start + duration - GetTime())
+  local start, duration = GetSpellCooldown("Танец теней")
+  local shadowDanceCD = (start + duration - GetTime())
+  if (energy+shadowDanceCD*energyRegen) or (energy+vanishCD*energyRegen) then
+    return true
+  else
+    return false
+  end
 end
 
 local poolEnergy = {
@@ -33,8 +41,8 @@ local poolEnergy = {
 local generator = {
   -- actions.generator=run_action_list,name=pool,if=buff.master_of_subtlety.down&buff.shadow_dance.down&debuff.find_weakness.down&(energy+cooldown.shadow_dance.remains*energy.regen<80|energy+cooldown.vanish.remains*energy.regen<60)
   { poolEnergy, { "!player.buff(Мастер скрытности)", "!player.buff(Танец теней)", "!target.debuff(Поиск слабости)", (function () return VanishCheck() end) }},
-  -- actions.generator+=/fan_of_knives,if=active_enemies>1
-  { "Веер клинков", (function () return EnemiesAroundPlayer(10) >= 7 end) },
+  -- actions.generator+=/fan_of_knives,if=active_enemies>6
+  { "Веер клинков", (function () return UnitsAroundMe(10) >= 7 end) },
   -- actions.generator+=/hemorrhage,if=(remains<8&target.time_to_die>10)|position_front
   { "Кровоизлияние", "target.debuff(Кровоизлияние).duration < 8" },
   { "Кровоизлияние", "!player.behind"},
@@ -52,18 +60,18 @@ local finisher = {
   -- actions.finisher+=/death_from_above
   { "Смерть с небес", "player.spell(Смерть с небес).exists"},
   -- actions.finisher+=/rupture,cycle_targets=1,if=(!ticking|remains<duration*0.3)&active_enemies<=3&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
-  { "Рваная рана", { "!target.debuff(Рваная рана)", (function () return (EnemiesAroundPlayer(1.2) <= 3) end), "player.spell(Смерть с небес).cooldown > 0" }},
-  { "Рваная рана", { "!target.debuff(Рваная рана)", (function () return (EnemiesAroundPlayer(1.2) <= 3) end), "!player.spell(Смерть с небес).exists" }},
-  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (function () return (EnemiesAroundPlayer(1.2) <= 3) end), "player.spell(Смерть с небес).cooldown > 0" }},
-  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (function () return (EnemiesAroundPlayer(1.2) <= 3) end), "!player.spell(Смерть с небес).exists" }},
+  { "Рваная рана", { "!target.debuff(Рваная рана)", (function () return UnitsAroundMe(1.2) <= 3 end), "player.spell(Смерть с небес).cooldown > 0" }},
+  { "Рваная рана", { "!target.debuff(Рваная рана)", (function () return UnitsAroundMe(1.2) <= 3 end), "!player.spell(Смерть с небес).exists" }},
+  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (function () return UnitsAroundMe(1.2) <= 3 end), "player.spell(Смерть с небес).cooldown > 0" }},
+  { "Рваная рана", { "target.debuff(Рваная рана).duration <= 7.2", (function () return UnitsAroundMe(1.2) <= 3 end), "!player.spell(Смерть с небес).exists" }},
   -- actions.finisher+=/crimson_tempest,if=(active_enemies>3&dot.crimson_tempest_dot.ticks_remain<=2&combo_points=5)|active_enemies>=5&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
-  { "Кровавый вихрь", {(function () return (EnemiesAroundPlayer(10) > 3) end), "target.debuff(Кровавый вихрь).duration <= 5.9", "player.combopoints = 5"}},
-  { "Кровавый вихрь", {(function () return (EnemiesAroundPlayer(10) >= 5) end), "player.spell(Смерть с небес).cooldown > 0"}},
-  { "Кровавый вихрь", {(function () return (EnemiesAroundPlayer(10) >= 5) end), "!player.spell(Смерть с небес).exists"}},
+  { "Кровавый вихрь", { (function () return UnitsAroundMe(10) > 3 end), "target.debuff(Кровавый вихрь).duration <= 5.9", "player.combopoints = 5"}},
+  { "Кровавый вихрь", { (function () return UnitsAroundMe(10) >= 5 end), "player.spell(Смерть с небес).cooldown > 0"}},
+  { "Кровавый вихрь", { (function () return UnitsAroundMe(10) >= 5 end), "!player.spell(Смерть с небес).exists"}},
   -- actions.finisher+=/eviscerate,if=active_enemies<4|(active_enemies>3&dot.crimson_tempest_dot.ticks_remain>=2)&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
-  { "Потрошение", (function () return (EnemiesAroundPlayer(10) < 4) end)},
-  { "Потрошение", (function () return (EnemiesAroundPlayer(10) > 3) end), "target.debuff(Кровавый вихрь).duration < 5.9", "player.spell(Смерть с небес).cooldown > 0"},
-  { "Потрошение", (function () return (EnemiesAroundPlayer(10) > 3) end), "target.debuff(Кровавый вихрь).duration < 5.9", "!player.spell(Смерть с небес).exists"},
+  { "Потрошение", { (function () return UnitsAroundMe(10) < 4 end) }},
+  { "Потрошение", { (function () return UnitsAroundMe(10) > 3 end), "target.debuff(Кровавый вихрь).duration < 5.9", "player.spell(Смерть с небес).cooldown > 0"}},
+  { "Потрошение", { (function () return UnitsAroundMe(10) > 3 end), "target.debuff(Кровавый вихрь).duration < 5.9", "!player.spell(Смерть с небес).exists"}},
   -- actions.finisher+=/run_action_list,name=pool
   { poolEnergy },
 }
@@ -73,11 +81,11 @@ ProbablyEngine.rotation.register_custom(261, "biGGerSub", {
   { "Смертоносный яд", { "!player.buff(Смертоносный яд)", "!player.moving" }},
   
   -- actions+=/premeditation,if=combo_points<=4
-  { "Умысел", { "player.combopoints <= 4" }},
+  { "Умысел", "player.combopoints <= 4", "target"},
 
   -- actions+=/ambush,if=combo_points<5|(talent.anticipation.enabled&anticipation_charges<3)
-  { "Внезапный удар", { "player.combopoints <= 4", "player.buff(Танец теней)" }},
-  { "Внезапный удар", { "player.buff(Предчувствие).count <= 2", "player.buff(Танец теней)" }},
+  { "Внезапный удар", { "player.combopoints < 5", "player.buff(Танец теней)" }},
+  { "Внезапный удар", { "player.buff(Предчувствие).count < 3", "player.buff(Танец теней)" }},
   { "pause", { "player.combopoints <= 4", "player.buff(Танец теней)"}},
 
   -- actions+=/shadow_dance,if=energy>=75&buff.stealth.down&buff.vanish.down&debuff.find_weakness.down
@@ -108,21 +116,24 @@ ProbablyEngine.rotation.register_custom(261, "biGGerSub", {
 
 
 },{
-  
+
   { "Смертоносный яд", { 
     "!player.buff(Смертоносный яд)", 
     "!player.moving",
   }},
 
-  -- { "Похищающий жизнь яд", { "!player.buff(Похищающий жизнь яд)", "!player.moving", }},
-  
   { "Внезапный удар", { 
-    "player.buff(Незаметность)", 
+    "player.buff(Исчезновение)", 
     "target.spell(Внезапный удар).range" 
   }, "target" },
 
+  -- actions+=/premeditation,if=combo_points<=4
+  { "Умысел", "player.combopoints <= 4", "target"},
+
+  { "Мясорубка", {}, "target"},
+  
   { "Внезапный удар", { 
-    "player.buff(Исчезновение)", 
+    "player.buff(Незаметность)", 
     "target.spell(Внезапный удар).range" 
   }, "target" },
   
