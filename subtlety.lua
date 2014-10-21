@@ -130,12 +130,14 @@ end
 preferredTarget = preferredTarget
 RuptureCycle = function ()
   local spellName, spellRank = GetSpellName("1943", BOOKTYPE_SPELL)
-  TargetUnit(preferredTarget)
-  CastSpellByName(spellName)
+  if preferredTarget then
+    TargetUnit(preferredTarget)
+    CastSpellByName(spellName)
+  end
 end
 
 RuptureCycleCheck = function ()
-  preferredTarget = null
+  preferredTarget = nil
   -- actions.finisher+=/rupture,cycle_targets=1,if=(!ticking|remains<duration*0.3)&active_enemies<=3&(cooldown.death_from_above.remains>0|!talent.death_from_above.enabled)
   if UnitsInMeleeRange <= 3 then
     if FireHack then
@@ -271,7 +273,7 @@ ProbablyEngine.rotation.register_custom(261, "biGGer Subtlety", {
 
 
 },{
-  { "8676", { "player.buff(11327)" }},
+  { "8676", { "player.buff(11327)", "target.spell(8676).range"}, "target"},
 
   { "pause", { (function () return Autosap() end), "toggle.sap"}},
   { "108212", { "player.buff(137573).duration < 1", "player.moving", "timeout(4,108212)"}},
