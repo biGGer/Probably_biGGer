@@ -228,7 +228,7 @@ local finisher = {
   { preparation },
 }
 -- SPEC ID 261
-ProbablyEngine.rotation.register_custom(261, "biGGerSub", {
+ProbablyEngine.rotation.register_custom(261, "biGGer Subtlety", {
   -- AoE Detection
   { "pause", (function () return UnitsAroundMe() end)},
   { "/targetenemy [noexists][dead]", { "toggle.autotarget", "!target.exists" }}, { "/targetenemy [dead]", { "toggle.autotarget", "target.exists", "target.dead" }},
@@ -252,9 +252,9 @@ ProbablyEngine.rotation.register_custom(261, "biGGerSub", {
   { "1856", { "player.energy >= 45", "player.combopoints <= 3", "!player.buff(51713)", "!player.buff(31223)", "!target.debuff(91021)", "toggle.vanish"}},
   
   -- actions+=/marked_for_death,if=combo_points=0
-  {"Метка смерти", {"player.spell(Метка смерти).exists", "player.combopoints = 0"}},
+  { "137619", {"player.spell(137619).exists", "player.combopoints = 0"}},
   -- actions+=/shadow_reflection,if=buff.shadow_dance.up
-  {"152151", {"player.spell(152151).exists", "player.buff(51713)"}},
+  { "152151", {"player.spell(152151).exists", "player.buff(51713)"}},
 
 
   -- actions+=/run_action_list,name=generator,if=talent.anticipation.enabled&anticipation_charges<4&buff.slice_and_dice.up&dot.rupture.remains>2&(buff.slice_and_dice.remains<6|dot.rupture.remains<4)
@@ -286,7 +286,7 @@ ProbablyEngine.rotation.register_custom(261, "biGGerSub", {
   }, "target" },
 
   -- actions+=/premeditation,if=combo_points<=4
-  { "Умысел", "player.combopoints <= 4", "target"},
+  { "14183", "player.combopoints <= 4", "target"},
 
   { "5171", { "player.buff(5171).duration < 4" }, "target"},
 
