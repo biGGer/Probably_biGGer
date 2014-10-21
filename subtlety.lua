@@ -271,6 +271,8 @@ ProbablyEngine.rotation.register_custom(261, "biGGer Subtlety", {
 
 
 },{
+  { "8676", { "player.buff(11327)" }},
+
   { "pause", { (function () return Autosap() end), "toggle.sap"}},
   { "108212", { "player.buff(137573).duration < 1", "player.moving", "timeout(4,108212)"}},
   --{ "108212", { "!player.buff(137573)", "player.moving"}},
@@ -279,11 +281,6 @@ ProbablyEngine.rotation.register_custom(261, "biGGer Subtlety", {
     "!player.buff(2823)", 
     "!player.moving",
   }},
-
-  { "8676", { 
-    "player.buff(1856)", 
-    "target.spell(8676).range" 
-  }, "target" },
 
   -- actions+=/premeditation,if=combo_points<=4
   { "14183", "player.combopoints <= 4", "target"},
